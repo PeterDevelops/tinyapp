@@ -7,18 +7,18 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-app.get('/', (req, res) => {
+app.get('/', (req, res) => { // main doman
   res.send('Hello!');
 });
 
-app.get('/urls.json', (req, res) => {
+app.get('/urls.json', (req, res) => { // sub domain
   res.json(urlDatabase);
 })
 
-app.get('/hello', (req, res) => {
+app.get('/hello', (req, res) => { // sub domain
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, () => { // what port we 
   console.log(`Example app listening on port: ${PORT}`);
 });
