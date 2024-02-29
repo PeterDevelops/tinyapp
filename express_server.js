@@ -13,6 +13,11 @@ app.get('/', (req, res) => { // main doman
   res.send('Hello!');
 });
 
+app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlDatabase object
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+})
+
 app.get('/urls.json', (req, res) => { // sub domain
   res.json(urlDatabase);
 })
