@@ -17,7 +17,7 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); // express middleware/parser
 
 app.get('/', (req, res) => { // main doman
   res.send('Hello!');
@@ -29,7 +29,9 @@ app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlD
 })
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+  urlDatabase[generateRandomString(6)] = req.body.longURL;
+  // console.log(req.body); // Log the POST request body to the console
+  console.log(urlDatabase);
   res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
