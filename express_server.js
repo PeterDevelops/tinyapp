@@ -35,6 +35,12 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+app.post('/urls/:id/delete', (req, res) => {
+  const deleteID = req.params.id;
+  delete urlDatabase[deleteID];
+  res.redirect('/urls/');
+})
+
 app.get('/urls.json', (req, res) => { // sub domain
   res.json(urlDatabase);
 });
