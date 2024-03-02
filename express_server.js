@@ -32,7 +32,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(6);
   urlDatabase[shortURL] = req.body.longURL;
   console.log(urlDatabase);
-  res.redirect(`urls/${shortURL}`);
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get('/urls.json', (req, res) => { // sub domain
