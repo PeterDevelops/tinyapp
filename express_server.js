@@ -29,10 +29,10 @@ app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlD
 })
 
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString(6)] = req.body.longURL;
-  // console.log(req.body); // Log the POST request body to the console
+  const shortURL = generateRandomString(6);
+  urlDatabase[shortURL] = req.body.longURL;
   console.log(urlDatabase);
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect(`urls/${shortURL}`);
 });
 
 app.get('/urls.json', (req, res) => { // sub domain
@@ -51,6 +51,17 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id , longURL: urlDatabase['id'] };
   res.render("urls_show", templateVars);
 });
+
+app.get('/u/:id', (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+      res.status(404).send('URL Not Found.')
+  }
+})
+
 
 app.listen(PORT, () => { // what port we
   console.log(`Example app listening on port: ${PORT}`);
