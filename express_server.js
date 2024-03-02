@@ -26,7 +26,7 @@ app.get('/', (req, res) => { // main doman
 app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlDatabase object
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
-})
+});
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(6);
@@ -37,15 +37,15 @@ app.post("/urls", (req, res) => {
 
 app.get('/urls.json', (req, res) => { // sub domain
   res.json(urlDatabase);
-})
+});
 
 app.get('/hello', (req, res) => { // sub domain
   res.send('<html><body>Hello <b>World</b></body></html>\n');
-})
+});
 
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
-})
+});
 
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id , longURL: urlDatabase['id'] };
@@ -60,8 +60,7 @@ app.get('/u/:id', (req, res) => {
   } else {
       res.status(404).send('URL Not Found.')
   }
-})
-
+});
 
 app.listen(PORT, () => { // what port we
   console.log(`Example app listening on port: ${PORT}`);
