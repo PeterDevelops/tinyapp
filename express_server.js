@@ -63,6 +63,17 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
+// app.post('/register', (req, res) => {
+//   templateVars = { 
+//   id: req.params.id,
+//   username: req.cookies["username"]
+// };
+// });
+
+app.get('/register', (req, res) => {
+  res.render('register')
+});
+
 app.get('/urls.json', (req, res) => { // sub domain
   res.json(urlDatabase);
 });
