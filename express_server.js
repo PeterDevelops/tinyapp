@@ -39,13 +39,18 @@ app.post('/urls/:id/delete', (req, res) => {
   const deleteID = req.params.id;
   delete urlDatabase[deleteID];
   res.redirect('/urls');
-})
+});
 
 app.post('/urls/:id', (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls')
-})
+});
+
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username)
+  res.redirect('/urls')
+});
 
 app.get('/urls.json', (req, res) => { // sub domain
   res.json(urlDatabase);
