@@ -38,7 +38,13 @@ app.post("/urls", (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   const deleteID = req.params.id;
   delete urlDatabase[deleteID];
-  res.redirect('/urls/');
+  res.redirect('/urls');
+})
+
+app.post('/urls/:id', (req, res) => {
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect('/urls')
 })
 
 app.get('/urls.json', (req, res) => { // sub domain
@@ -54,7 +60,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id , longURL: urlDatabase['id'] };
+  const templateVars = { id: req.params.id , longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
