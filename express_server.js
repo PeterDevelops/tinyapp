@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+const cookieParser = require('cookie-parser');
 
 const generateRandomString = length => {
   let str = '';
@@ -9,6 +10,8 @@ const generateRandomString = length => {
   }
   return str.slice(0, length);
 };
+
+app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
@@ -24,7 +27,10 @@ app.get('/', (req, res) => { // main doman
 });
 
 app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlDatabase object
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+  urls: urlDatabase,
+  username: req.cookies["username"]
+};
   res.render('urls_index', templateVars);
 });
 
@@ -61,11 +67,16 @@ app.get('/hello', (req, res) => { // sub domain
 });
 
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { username: req.cookies["username"] }
+  res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id , longURL: urlDatabase[req.params.id] };
+  const templateVars = { 
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies['username']
+  };
   res.render("urls_show", templateVars);
 });
 
