@@ -10,6 +10,7 @@ const generateRandomString = length => {
   }
   return str.slice(0, length);
 };
+
 const checkExistingEmail = (email) => {
   for (const userId in users) {
     if (users[userId].email === email) {
@@ -83,9 +84,9 @@ app.post('/login', (req, res) => {
     res.cookie('user_id', req.body.user_id)
     res.redirect('/urls')
   } else {
-    res.status(400).send('Invalid email or password');
+    res.status(400).send('Invalid email or password.');
   }
-
+  console.log(users);
 });
 
 app.post('/logout', (req, res) => {
