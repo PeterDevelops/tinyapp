@@ -81,7 +81,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (email === '' || password === '') {
+  if (!email || !password) {
     res.status(400).send('e-mail or password is empty.');
   } else if (checkExistingEmail(email)) {
     res.status(400).send('Email address already exist.')
@@ -92,11 +92,13 @@ app.post('/register', (req, res) => {
       password
     };
     res.cookie('user_id', randomStr);
-    console.log(users);
     res.redirect('/urls')
   }
-  console.log(users);
 });
+
+app.get('/login', (req, res) => {
+  res.render('login');
+})
 
 app.get('/register', (req, res) => {
   res.render('register')
