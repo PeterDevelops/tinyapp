@@ -10,15 +10,24 @@ const generateRandomString = length => {
   }
   return str.slice(0, length);
 };
-
-const checkExistingEmail = email => {
+const checkExistingEmail = (email) => {
   for (const userId in users) {
     if (users[userId].email === email) {
       return true;
     }
   }
   return false;
-} 
+};
+
+const checkExistingPassword = (password) => {
+  for (const userId in users) {
+    if (users[userId].password === password) {
+      return true;
+    }
+  }
+  return false;
+};
+
 
 app.use(cookieParser());
 
@@ -67,8 +76,16 @@ app.post('/urls/:id', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('user_id', req.body.user_id)
-  res.redirect('/urls')
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  if (checkExistingEmail(email) && checkExistingPassword(password)) {
+    res.cookie('user_id', req.body.user_id)
+    res.redirect('/urls')
+  } else {
+    res.status(400).send('Invalid email or password');
+  }
+
 });
 
 app.post('/logout', (req, res) => {
