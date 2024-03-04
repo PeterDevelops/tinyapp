@@ -12,14 +12,12 @@ const generateRandomString = length => {
 };
 
 const checkExistingEmail = email => {
-  let emailExists = false;
   for (const userId in users) {
     if (users[userId].email === email) {
-      emailExists = true;
-      break;
+      return true;
     }
   }
-  return emailExists;
+  return false;
 } 
 
 app.use(cookieParser());
