@@ -11,13 +11,22 @@ const generateRandomString = length => {
   return str.slice(0, length);
 };
 
+const checkExistingEmail = email => {
+  let emailExists = false;
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      emailExists = true;
+      break;
+    }
+  }
+  return emailExists;
+} 
+
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
-const users = {
-  
-}
+const users = {}
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -71,14 +80,24 @@ app.post('/logout', (req, res) => {
 
 app.post('/register', (req, res) => {
   const randomStr = generateRandomString(6);
-  users[randomStr] = {
-    id: randomStr,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie('user_id', randomStr);
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (email === '' || password === '') {
+    res.status(400).send('e-mail or password is empty.');
+  } else if (checkExistingEmail(email)) {
+    res.status(400).send('Email address already exist.')
+  } else {
+    users[randomStr] = {
+      id: randomStr,
+      email,
+      password
+    };
+    res.cookie('user_id', randomStr);
+    console.log(users);
+    res.redirect('/urls')
+  }
   console.log(users);
-  res.redirect('/urls')
 });
 
 app.get('/register', (req, res) => {
