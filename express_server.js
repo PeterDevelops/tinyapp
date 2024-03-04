@@ -15,6 +15,10 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
+const users = {
+  
+}
+
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
@@ -27,9 +31,11 @@ app.get('/', (req, res) => { // main doman
 });
 
 app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlDatabase object
-  const templateVars = { 
+  const userId = req.cookies.user_id;
+  const userObject = users[userId];
+  const templateVars = {
   urls: urlDatabase,
-  username: req.cookies["username"]
+  user: userObject
 };
   res.render('urls_index', templateVars);
 });
@@ -54,21 +60,26 @@ app.post('/urls/:id', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username)
+  res.cookie('user_id', req.body.user_id)
   res.redirect('/urls')
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
-// app.post('/register', (req, res) => {
-//   templateVars = { 
-//   id: req.params.id,
-//   username: req.cookies["username"]
-// };
-// });
+app.post('/register', (req, res) => {
+  const randomStr = generateRandomString(6);
+  users[randomStr] = {
+    id: randomStr,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('user_id', randomStr);
+  console.log(users);
+  res.redirect('/urls')
+});
 
 app.get('/register', (req, res) => {
   res.render('register')
@@ -83,15 +94,19 @@ app.get('/hello', (req, res) => { // sub domain
 });
 
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: req.cookies["username"] }
+  const userId = req.cookies.user_id;
+  const userObject = users[userId];
+  const templateVars = { user: userObject }
   res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies.user_id;
+  const userObject = users[userId];
   const templateVars = { 
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies['username']
+    user: userObject
   };
   res.render("urls_show", templateVars);
 });
