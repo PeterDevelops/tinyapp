@@ -20,9 +20,9 @@ const checkExistingEmail = (email) => {
   return false;
 };
 
-const checkExistingPassword = (password) => {
+const checkExistingEmailAndPassword = (email, password) => {
   for (const userId in users) {
-    if (users[userId].password === password) {
+    if (users[userId].email === email && users[userId].password === password) {
       return true;
     }
   }
@@ -80,7 +80,7 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   
-  if (checkExistingEmail(email) && checkExistingPassword(password)) {
+  if (checkExistingEmailAndPassword(email, password)) {
     res.cookie('user_id', req.body.user_id)
     res.redirect('/urls')
   } else {
