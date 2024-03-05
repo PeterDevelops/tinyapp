@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
+const { cookie } = require('request');
 
 const generateRandomString = length => {
   let str = '';
@@ -66,6 +67,11 @@ app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlD
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.cookies.user_id;
+  if (!userId) {
+    return res.status(400).send('<p>You must be logged in to shorten URLS.</p>')
+  }
+
   const shortURL = generateRandomString(6);
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
@@ -120,14 +126,23 @@ app.post('/login', (req, res) => {
   }
   const sessionId = getSessionId(email);
   res.cookie('user_id', sessionId);
+  console.log(users);
   res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
+  const cookieChecker = req.cookies.user_id;
+  if (cookieChecker) {
+    return res.redirect('/urls');
+  }
   res.render('login');
 });
 
 app.get('/register', (req, res) => {
+  const cookieChecker = req.cookies.user_id;
+  if (cookieChecker) {
+    return res.redirect('/urls');
+  }
   res.render('register');
 });
 
@@ -143,6 +158,10 @@ app.get('/urls/new', (req, res) => {
   const userId = req.cookies.user_id;
   const userObject = users[userId];
   const templateVars = { user: userObject };
+  if (!userId) {
+    return res.redirect('/login');
+  }
+
   res.render('urls_new', templateVars);
 });
 
