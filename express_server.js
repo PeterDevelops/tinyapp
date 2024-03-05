@@ -182,7 +182,7 @@ app.get('/u/:id', (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.status(404).send('URL Not Found.');
+    res.status(404).send('<p>URL does not exist.</p>');
   }
 });
 
