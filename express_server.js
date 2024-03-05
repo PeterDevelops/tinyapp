@@ -59,9 +59,9 @@ app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlD
   const userId = req.cookies.user_id;
   const userObject = users[userId];
   const templateVars = {
-  urls: urlDatabase,
-  user: userObject
-};
+    urls: urlDatabase,
+    user: userObject
+  };
   res.render('urls_index', templateVars);
 });
 
@@ -80,7 +80,7 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.longURL;
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
@@ -94,9 +94,9 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   
   if (!email || !password) {
-    res.status(400).send('Email or password is empty.');
+    return res.status(400).send('Email or password is empty.');
   } else if (checkExistingEmail(email)) {
-    res.status(400).send('Email address already exist.')
+    return res.status(400).send('Email address already exist.');
   } else {
     users[randomStr] = {
       id: randomStr,
@@ -104,32 +104,31 @@ app.post('/register', (req, res) => {
       password
     };
     res.cookie('user_id', randomStr);
-    res.redirect('/urls')
+    res.redirect('/urls');
   }
 });
 
 app.post('/login', (req, res) => {
-  const randomStr = generateRandomString(6);
   const email = req.body.email;
   const password = req.body.password;
 
   if (!checkExistingEmail(email)) {
     return res.status(403).send('Invalid email.');
-  } 
+  }
   if (!checkPassword(email, password)) {
     return res.status(403).send('Invalid password.');
   }
   const sessionId = getSessionId(email);
-    res.cookie('user_id', sessionId);
-    res.redirect('/urls')
+  res.cookie('user_id', sessionId);
+  res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
   res.render('login');
-})
+});
 
 app.get('/register', (req, res) => {
-  res.render('register')
+  res.render('register');
 });
 
 app.get('/urls.json', (req, res) => { // sub domain
@@ -143,14 +142,14 @@ app.get('/hello', (req, res) => { // sub domain
 app.get('/urls/new', (req, res) => {
   const userId = req.cookies.user_id;
   const userObject = users[userId];
-  const templateVars = { user: userObject }
+  const templateVars = { user: userObject };
   res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies.user_id;
   const userObject = users[userId];
-  const templateVars = { 
+  const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
     user: userObject
@@ -164,7 +163,7 @@ app.get('/u/:id', (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-      res.status(404).send('URL Not Found.')
+    res.status(404).send('URL Not Found.');
   }
 });
 
