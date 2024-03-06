@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
 const { cookie } = require('request');
+const bcrypt = require('bcryptjs');
 
 app.set('view engine', 'ejs');
 
@@ -38,8 +39,6 @@ const getSessionId = (email) => {
 const urlsForUser = (id) => {
   const userURLs = {};
   for (const shortURL in urlDatabase) {
-    console.log(shortURL, 'shortID');
-    console.log(urlDatabase[shortURL].userID);
     if (urlDatabase[shortURL].userID === id) {
       userURLs[shortURL] = urlDatabase[shortURL].longURL;
     }
@@ -147,8 +146,9 @@ app.post('/register', (req, res) => {
   const randomStr = generateRandomString(6);
   const email = req.body.email;
   const password = req.body.password;
-  
-  if (!email || !password) {
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
+  if (!email || !hashedPassword) {
     return res.status(400).send('Email or password is empty.');
   } else if (checkExistingEmail(email)) {
     return res.status(400).send('Email address already exist.');
@@ -156,7 +156,7 @@ app.post('/register', (req, res) => {
     users[randomStr] = {
       id: randomStr,
       email,
-      password
+      hashedPassword
     };
     res.cookie('user_id', randomStr);
     res.redirect('/urls');
@@ -166,11 +166,13 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  const checkHashedPassword = bcrypt.compareSync(password, hashedPassword);
 
   if (!checkExistingEmail(email)) {
     return res.status(403).send('Invalid email.');
   }
-  if (!checkPassword(email, password)) {
+  if (!checkHashedPassword) {
     return res.status(403).send('Invalid password.');
   }
   const sessionId = getSessionId(email);
