@@ -17,6 +17,15 @@ const generateRandomString = length => {
   return str.slice(0, length);
 };
 
+const checkExistingEmail = (email) => {
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const getSessionId = (email) => {
   for (const userId in users) {
     if (users[userId].email === email) {
@@ -26,13 +35,14 @@ const getSessionId = (email) => {
   return false;
 };
 
-const checkExistingEmail = (email) => {
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return true;
+const urlsForUser = (id) => {
+  const userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = urlDatabase[shortURL];
     }
   }
-  return false;
+  return userURLs;
 };
 
 const checkPassword = (email, password) => {
@@ -57,16 +67,18 @@ const urlDatabase = {
   },
 };
 
-app.get('/', (req, res) => { // main doman
+app.get('/', (req, res) => {
   res.send('Hello!');
 });
 
-app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlDatabase object
+// main page
+app.get('/urls', (req, res) => {
   const userId = req.cookies.user_id;
+  console.log(users, 'current cookie')
   const userObject = users[userId];
   const templateVars = {
     urls: urlDatabase,
-    user: userObject,
+    user: userObject
   };
   res.render('urls_index', templateVars);
 });
