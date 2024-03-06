@@ -4,6 +4,11 @@ const PORT = 8080;
 const cookieParser = require('cookie-parser');
 const { cookie } = require('request');
 
+app.set('view engine', 'ejs');
+
+app.use(express.urlencoded({ extended: true })); // express middleware/parser
+app.use(cookieParser());
+
 const generateRandomString = length => {
   let str = '';
   for (let i = 0; i <= length; i++) {
@@ -39,17 +44,17 @@ const checkPassword = (email, password) => {
   return false;
 };
 
-app.use(express.urlencoded({ extended: true })); // express middleware/parser
-
-app.use(cookieParser());
-
-app.set('view engine', 'ejs');
-
 const users = {};
 
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  b6UTxQ: {
+    longURL: "https://www.lighthouselabs.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 app.get('/', (req, res) => { // main doman
@@ -61,7 +66,7 @@ app.get('/urls', (req, res) => { // subdomain /urls has access to the urls: urlD
   const userObject = users[userId];
   const templateVars = {
     urls: urlDatabase,
-    user: userObject
+    user: userObject,
   };
   res.render('urls_index', templateVars);
 });
@@ -71,10 +76,12 @@ app.post("/urls", (req, res) => {
   if (!userId) {
     return res.status(400).send('<p>You must be logged in to shorten URLS.</p>')
   }
-
-  const shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
+  const id = generateRandomString(6);
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID: id
+  }
+  res.redirect(`/urls/${id}`);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
@@ -84,8 +91,8 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.post('/urls/:id', (req, res) => {
-  const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.longURL;
+  const id = req.params.id;
+  urlDatabase[id] = req.body.longURL;
   res.redirect('/urls');
 });
 
@@ -126,7 +133,6 @@ app.post('/login', (req, res) => {
   }
   const sessionId = getSessionId(email);
   res.cookie('user_id', sessionId);
-  console.log(users);
   res.redirect('/urls');
 });
 
@@ -161,28 +167,28 @@ app.get('/urls/new', (req, res) => {
   if (!userId) {
     return res.redirect('/login');
   }
-
   res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies.user_id;
   const userObject = users[userId];
+  const id = req.params.id;
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[id].longURL,
     user: userObject
   };
   res.render("urls_show", templateVars);
 });
 
 app.get('/u/:id', (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const id = req.params.id;
+  const longURL = urlDatabase[id].longURL;
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.status(404).send('<p>URL does not exist.</p>');
+    res.status(404).send('<html><body><p>URL does not exist.</p></body></html>');
   }
 });
 
