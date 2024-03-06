@@ -19,9 +19,9 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
-      <% if (!user) { %>
-        <p>Please log in or register.</p>
-        <% } else { %>
+      <!-- <% if (!user) { %> -->
+        <!-- <p>Please log in or register.</p> -->
+        <!-- <% } else { %> -->
       <h3>My URLs</h3>
       <table class="table">
         <thead>
@@ -37,19 +37,21 @@
           <% for (let id in urls) { %>  
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id].longURL %></td>
+              <td><%= urls[id] %></td>
               
               <td><a href="/urls/<%= id %>/">Edit</a></td>
               <td>
+
                 <form method="POST" action="/urls/<%= id %>/delete">
                   <button type="submit">Delete</button>
                 </form>
+
               </td>
             </tr>
           <% } %>
         </tbody>
       </table>
-      <% } %>
+      <!-- <% } %> -->
     </main>
     <!-- Bootstrap JS -->
     <script

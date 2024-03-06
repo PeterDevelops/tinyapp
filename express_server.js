@@ -38,8 +38,10 @@ const getSessionId = (email) => {
 const urlsForUser = (id) => {
   const userURLs = {};
   for (const shortURL in urlDatabase) {
+    console.log(shortURL, 'shortID');
+    console.log(urlDatabase[shortURL].userID);
     if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL];
+      userURLs[shortURL] = urlDatabase[shortURL].longURL;
     }
   }
   return userURLs;
@@ -74,36 +76,64 @@ app.get('/', (req, res) => {
 // main page
 app.get('/urls', (req, res) => {
   const userId = req.cookies.user_id;
-  console.log(users, 'current cookie')
   const userObject = users[userId];
+  if (!userId) {
+    return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
+  }
+  const userURLs = urlsForUser(userId);
   const templateVars = {
-    urls: urlDatabase,
+    urls: userURLs,
     user: userObject
   };
+  console.log(templateVars, 'current user');
   res.render('urls_index', templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const userId = req.cookies.user_id;
   if (!userId) {
-    return res.status(400).send('<p>You must be logged in to shorten URLS.</p>')
+    return res.status(401).send('<html><body><h3>You must be logged in to shorten URLS</h3></body></html>');
   }
   const id = generateRandomString(6);
   urlDatabase[id] = {
     longURL: req.body.longURL,
-    userID: id
+    userID: userId
   }
+  console.log(urlDatabase[id])
+  console.log(userId);
   res.redirect(`/urls/${id}`);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  const deleteID = req.params.id;
+  const currentlyLoggedIn = req.cookies.user_id;
+  const id = req.params.id;
+  const urls = urlDatabase[id];
+  if (!currentlyLoggedIn) { // checks if user is not logged in
+    return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
+  }
+  if (!urls) { // checks if url exists
+    return res.status(401).send('<html><body><h3>URL Not Found.</h3></body></html>')
+  }
+  if (urls.userID !== currentlyLoggedIn) { // checks if the current logged in user is the owner
+    return res.status(401).send('<html><body><h3>You do not have access to this.</h3></body></html>');
+  }
   delete urlDatabase[deleteID];
   res.redirect('/urls');
 });
 
 app.post('/urls/:id', (req, res) => {
+  const urls = urlDatabase[id];
   const id = req.params.id;
+  const currentlyLoggedIn = req.cookies.user_id;
+  if (!currentlyLoggedIn) {// if user is logged in
+    return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
+  }
+  if (!urls) { // if id exists in urlDatabase[id]
+    return res.status(401).res.send('<html><body><h3>URL Not Found.</h3></body></html>')
+  }
+  if (urls.userID !== currentlyLoggedIn) { // checks if user owns url
+    return res.status(401).send('<html><body><h3>You do not have access to this.</h3></body></html>');
+  }
   urlDatabase[id] = req.body.longURL;
   res.redirect('/urls');
 });
@@ -184,11 +214,21 @@ app.get('/urls/new', (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies.user_id;
-  const userObject = users[userId];
   const id = req.params.id;
+  const url = urlDatabase[id];
+  if (!userId) { // if cookie doesnt exist/ not logged in
+    return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
+  }
+  if (!url) { // if id does not exist
+    return res.status(401).send('<html><body><h3>URL Not Found.</h3></body></html>');
+  }
+  if (url.userID !== userId) { // if user does not own url
+    return res.status(401).send('<html><body><h3>Unable to access, user not authorized.</h3></body></html>')
+  }
+  const userObject = users[userId];
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[id].longURL,
+    longURL: url.longURL,
     user: userObject
   };
   res.render("urls_show", templateVars);
