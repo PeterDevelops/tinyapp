@@ -166,8 +166,8 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const checkHashedPassword = bcrypt.compareSync(password, hashedPassword);
+  const id = getSessionId(email);
+  const checkHashedPassword = bcrypt.compareSync(password, users[id].hashedPassword);
 
   if (!checkExistingEmail(email)) {
     return res.status(403).send('Invalid email.');
