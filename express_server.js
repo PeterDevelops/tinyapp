@@ -1,14 +1,20 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const { cookie } = require('request');
 const bcrypt = require('bcryptjs');
 
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true })); // express middleware/parser
-app.use(cookieParser());
+// app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: [key1, key2]
+}));
 
 const generateRandomString = length => {
   let str = '';
@@ -74,7 +80,9 @@ app.get('/', (req, res) => {
 
 // main page
 app.get('/urls', (req, res) => {
-  const userId = req.cookies.user_id;
+  // const userId = req.cookies.user_id; // reads user_id
+  // const userId = req.session.user_id;
+
   const userObject = users[userId];
   if (!userId) {
     return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
@@ -89,7 +97,8 @@ app.get('/urls', (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const userId = req.cookies.user_id;
+  // const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   if (!userId) {
     return res.status(401).send('<html><body><h3>You must be logged in to shorten URLS</h3></body></html>');
   }
@@ -104,7 +113,8 @@ app.post("/urls", (req, res) => {
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  const currentlyLoggedIn = req.cookies.user_id;
+  // const currentlyLoggedIn = req.cookies.user_id;
+  const currentlyLoggedIn = req.session.user_id;
   const id = req.params.id;
   const urls = urlDatabase[id];
   if (!currentlyLoggedIn) { // checks if user is not logged in
@@ -123,7 +133,8 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const urls = urlDatabase[id];
   const id = req.params.id;
-  const currentlyLoggedIn = req.cookies.user_id;
+  // const currentlyLoggedIn = req.cookies.user_id;
+  const currentlyLoggedIn = req.session.user_id;
   if (!currentlyLoggedIn) {// if user is logged in
     return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
   }
@@ -158,7 +169,8 @@ app.post('/register', (req, res) => {
       email,
       hashedPassword
     };
-    res.cookie('user_id', randomStr);
+    // res.cookie('user_id', randomStr); // sets a cookie id
+    req.session.user_id = randomStr;
     res.redirect('/urls');
   }
 });
@@ -176,12 +188,15 @@ app.post('/login', (req, res) => {
     return res.status(403).send('Invalid password.');
   }
   const sessionId = getSessionId(email);
-  res.cookie('user_id', sessionId);
+  // res.cookie('user_id', sessionId);
+  req.session.user_id = sessionId;
   res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
-  const cookieChecker = req.cookies.user_id;
+  // const cookieChecker = req.cookies.user_id;
+  const cookieChecker = req.session.user_id;
+
   if (cookieChecker) {
     return res.redirect('/urls');
   }
@@ -189,7 +204,9 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  const cookieChecker = req.cookies.user_id;
+  // const cookieChecker = req.cookies.user_id;
+  const cookieChecker = req.session.user_id;
+
   if (cookieChecker) {
     return res.redirect('/urls');
   }
@@ -205,7 +222,8 @@ app.get('/hello', (req, res) => { // sub domain
 });
 
 app.get('/urls/new', (req, res) => {
-  const userId = req.cookies.user_id;
+  // const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const userObject = users[userId];
   const templateVars = { user: userObject };
   if (!userId) {
@@ -215,7 +233,9 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies.user_id;
+  // const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
+
   const id = req.params.id;
   const url = urlDatabase[id];
   if (!userId) { // if cookie doesnt exist/ not logged in
