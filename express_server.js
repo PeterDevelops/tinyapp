@@ -4,6 +4,7 @@ const PORT = 8080;
 const cookieSession = require('cookie-session');
 const { cookie } = require('request');
 const bcrypt = require('bcryptjs');
+const { getUserByEmail } = require('./helper');
 
 app.set('view engine', 'ejs');
 
@@ -30,15 +31,6 @@ const checkExistingEmail = (email) => {
   return false;
 };
 
-const getSessionId = (email) => {
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return users[userId].id;
-    }
-  }
-  return false;
-};
-
 const urlsForUser = (id) => {
   const userURLs = {};
   for (const shortURL in urlDatabase) {
@@ -49,6 +41,15 @@ const urlsForUser = (id) => {
   return userURLs;
 };
 
+// const getSessionId = (email) => {
+//   for (const userId in users) {
+//     if (users[userId].email === email) {
+//       return users[userId].id;
+//     }
+//   }
+//   return false;
+// };
+
 const checkPassword = (email, password) => {
   for (const userId in users) {
     if (users[userId].email === email && users[userId].password === password) {
@@ -58,7 +59,18 @@ const checkPassword = (email, password) => {
   return false;
 };
 
-const users = {};
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 const urlDatabase = {
   b6UTxQ: {
@@ -148,10 +160,10 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-
-  if (!email || !hashedPassword) {
+  const userId = getUserByEmail(email, users);
+  if (!email || !hashedPassword) { // checks if email and password is empty string
     return res.status(400).send('Email or password is empty.');
-  } else if (checkExistingEmail(email)) {
+  } else if (userId) { // checks if our email exists in users
     return res.status(400).send('Email address already exist.');
   } else {
     users[randomStr] = {
@@ -159,7 +171,6 @@ app.post('/register', (req, res) => {
       email,
       hashedPassword
     };
-    // res.cookie('user_id', randomStr); // sets a cookie id
     req.session.user_id = randomStr;
     res.redirect('/urls');
   }
@@ -168,19 +179,16 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const id = getSessionId(email);
-  const checkHashedPassword = bcrypt.compareSync(password, users[id].hashedPassword);
-
-  if (!checkExistingEmail(email)) {
+  const userId = getUserByEmail(email, users);
+  if (!userId) {
     return res.status(403).send('Invalid email.');
   }
+  const checkHashedPassword = bcrypt.compareSync(password, users[userId].hashedPassword);
   if (!checkHashedPassword) {
     return res.status(403).send('Invalid password.');
   }
-  const sessionId = getSessionId(email);
-  // res.cookie('user_id', sessionId);
-  req.session.user_id = sessionId;
-  res.redirect('/urls');
+    req.session.user_id = userId;
+    res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
