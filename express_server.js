@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-// const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const { cookie } = require('request');
 const bcrypt = require('bcryptjs');
@@ -9,11 +8,9 @@ const bcrypt = require('bcryptjs');
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true })); // express middleware/parser
-// app.use(cookieParser());
-
 app.use(cookieSession({
   name: 'session',
-  keys: [key1, key2]
+  keys: ['key1', 'key2', 'key3']
 }));
 
 const generateRandomString = length => {
@@ -80,8 +77,7 @@ app.get('/', (req, res) => {
 
 // main page
 app.get('/urls', (req, res) => {
-  // const userId = req.cookies.user_id; // reads user_id
-  // const userId = req.session.user_id;
+  const userId = req.session.user_id;
 
   const userObject = users[userId];
   if (!userId) {
@@ -92,12 +88,10 @@ app.get('/urls', (req, res) => {
     urls: userURLs,
     user: userObject
   };
-  console.log(templateVars, 'current user');
   res.render('urls_index', templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  // const userId = req.cookies.user_id;
   const userId = req.session.user_id;
   if (!userId) {
     return res.status(401).send('<html><body><h3>You must be logged in to shorten URLS</h3></body></html>');
@@ -107,13 +101,10 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: userId
   }
-  console.log(urlDatabase[id])
-  console.log(userId);
   res.redirect(`/urls/${id}`);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  // const currentlyLoggedIn = req.cookies.user_id;
   const currentlyLoggedIn = req.session.user_id;
   const id = req.params.id;
   const urls = urlDatabase[id];
@@ -126,14 +117,13 @@ app.post('/urls/:id/delete', (req, res) => {
   if (urls.userID !== currentlyLoggedIn) { // checks if the current logged in user is the owner
     return res.status(401).send('<html><body><h3>You do not have access to this.</h3></body></html>');
   }
-  delete urlDatabase[deleteID];
+  delete urlDatabase[id];
   res.redirect('/urls');
 });
 
 app.post('/urls/:id', (req, res) => {
-  const urls = urlDatabase[id];
   const id = req.params.id;
-  // const currentlyLoggedIn = req.cookies.user_id;
+  const urls = urlDatabase[id];
   const currentlyLoggedIn = req.session.user_id;
   if (!currentlyLoggedIn) {// if user is logged in
     return res.status(401).send('<html><body><h3>Please Login or Register.</h3></body></html>');
@@ -144,12 +134,12 @@ app.post('/urls/:id', (req, res) => {
   if (urls.userID !== currentlyLoggedIn) { // checks if user owns url
     return res.status(401).send('<html><body><h3>You do not have access to this.</h3></body></html>');
   }
-  urlDatabase[id] = req.body.longURL;
+  urlDatabase[id].longURL = req.body.longURL;
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -194,9 +184,7 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  // const cookieChecker = req.cookies.user_id;
   const cookieChecker = req.session.user_id;
-
   if (cookieChecker) {
     return res.redirect('/urls');
   }
@@ -204,25 +192,15 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  // const cookieChecker = req.cookies.user_id;
   const cookieChecker = req.session.user_id;
-
   if (cookieChecker) {
     return res.redirect('/urls');
   }
   res.render('register');
 });
 
-app.get('/urls.json', (req, res) => { // sub domain
-  res.json(urlDatabase);
-});
-
-app.get('/hello', (req, res) => { // sub domain
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
-});
 
 app.get('/urls/new', (req, res) => {
-  // const userId = req.cookies.user_id;
   const userId = req.session.user_id;
   const userObject = users[userId];
   const templateVars = { user: userObject };
@@ -233,9 +211,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  // const userId = req.cookies.user_id;
   const userId = req.session.user_id;
-
   const id = req.params.id;
   const url = urlDatabase[id];
   if (!userId) { // if cookie doesnt exist/ not logged in
@@ -264,6 +240,14 @@ app.get('/u/:id', (req, res) => {
   } else {
     res.status(404).send('<html><body><p>URL does not exist.</p></body></html>');
   }
+});
+
+app.get('/urls.json', (req, res) => { // sub domain
+  res.json(urlDatabase);
+});
+
+app.get('/hello', (req, res) => { // sub domain
+  res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
 app.listen(PORT, () => { // what port we
