@@ -23,7 +23,8 @@ Welcome to TinyApp, your go-to solution for shortening long URLs with ease! Buil
 - bcryptjs
 - cookie-session
 
-## Getting Started
-
-- Install all dependencies (using the `npm install` command).
-- Run the development web server using the `node express_server.js` command.
+## Installation Instructions
+1. **Clone the Repository:** Clone the TinyApp repository to your local machine.
+2. **Install Dependencies:** Install all dependencies (using the `npm install` command).
+3. **Start the Server:** Run the development web server using the `node express_server.js` command.
+4. **Access TinyApp:** Open your web browser and navigate to `http://localhost:8080` to access TinyApp

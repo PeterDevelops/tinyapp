@@ -2,36 +2,36 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const cookieSession = require('cookie-session');
-const { cookie } = require('request');
+// const { cookie } = require('request');
 const bcrypt = require('bcryptjs');
-const { getUserByEmail } = require('./helpers');
+const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers');
 
 app.set('view engine', 'ejs');
 
-app.use(express.urlencoded({ extended: true })); // express middleware/parser
-app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2', 'key3']
 }));
 
-const generateRandomString = (length) => {
-  let str = '';
-  for (let i = 0; i <= length; i++) {
-    str += Math.random().toString(36).slice(2);
-  }
-  return str.slice(0, length);
-};
+// const generateRandomString = (length) => {
+//   let str = '';
+//   for (let i = 0; i <= length; i++) {
+//     str += Math.random().toString(36).slice(2);
+//   }
+//   return str.slice(0, length);
+// };
 
-const urlsForUser = (id) => {
-  const userURLs = {};
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL].longURL;
-    }
-  }
-  return userURLs;
-};
+// const urlsForUser = (id) => {
+//   const userURLs = {};
+//   for (const shortURL in urlDatabase) {
+//     if (urlDatabase[shortURL].userID === id) {
+//       userURLs[shortURL] = urlDatabase[shortURL].longURL;
+//     }
+//   }
+//   return userURLs;
+// };
 
 const users = {
   userRandomID: {
@@ -85,7 +85,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[id] = {
     longURL: req.body.longURL,
     userID: userId
-  }
+  };
   res.redirect(`/urls/${id}`);
 });
 
@@ -97,7 +97,7 @@ app.post('/urls/:id/delete', (req, res) => {
     return res.status(401).send('<html><body><h3>Please <a href="http://localhost:8080/login">Login</a> or <a href="http://localhost:8080/register">Register</a>.</h3></body></html>');
   }
   if (!urls) { // checks if url exists
-    return res.status(401).send('<html><body><h3>URL Not Found.</h3></body></html>')
+    return res.status(401).send('<html><body><h3>URL Not Found.</h3></body></html>');
   }
   if (urls.userID !== currentlyLoggedIn) { // checks if the current logged in user is the owner
     return res.status(401).send('<html><body><h3>You do not have access to this.</h3></body></html>');
@@ -114,7 +114,7 @@ app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   const urls = urlDatabase[id];
   if (!urls) { // if id exists in urlDatabase[id]
-    return res.status(401).res.send('<html><body><h3>URL Not Found.</h3></body></html>')
+    return res.status(401).res.send('<html><body><h3>URL Not Found.</h3></body></html>');
   }
   if (urls.userID !== currentlyLoggedIn) { // checks if user owns url
     return res.status(403).send('<html><body><h3>You do not have access to this.</h3></body></html>');
@@ -160,8 +160,8 @@ app.post('/login', (req, res) => {
   if (!checkHashedPassword) {
     return res.status(401).send('Invalid password.');
   }
-    req.session.user_id = userId;
-    res.redirect('/urls');
+  req.session.user_id = userId;
+  res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
@@ -185,9 +185,9 @@ app.get('/urls/new', (req, res) => {
   const userId = req.session.user_id;
   if (!userId) {
     return res.redirect('/login');
-  };
+  }
   const userObject = users[userId];
-  const templateVars = { 
+  const templateVars = {
     user: userObject
   };
   res.render('urls_new', templateVars);
@@ -204,7 +204,7 @@ app.get("/urls/:id", (req, res) => {
     return res.status(401).send('<html><body><h3>URL Not Found.</h3></body></html>');
   }
   if (url.userID !== userId) { // if user does not own url
-    return res.status(403).send('<html><body><h3>Unable to access, user not authorized.</h3></body></html>')
+    return res.status(403).send('<html><body><h3>Unable to access, user not authorized.</h3></body></html>');
   }
   const userObject = users[userId];
   const templateVars = {
