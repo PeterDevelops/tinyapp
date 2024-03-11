@@ -4,7 +4,7 @@ const PORT = 8080;
 const cookieSession = require('cookie-session');
 // const { cookie } = require('request');
 const bcrypt = require('bcryptjs');
-const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers');
+const { getUserByEmail } = require('./helpers');
 
 app.set('view engine', 'ejs');
 
@@ -15,23 +15,23 @@ app.use(cookieSession({
   keys: ['key1', 'key2', 'key3']
 }));
 
-// const generateRandomString = (length) => {
-//   let str = '';
-//   for (let i = 0; i <= length; i++) {
-//     str += Math.random().toString(36).slice(2);
-//   }
-//   return str.slice(0, length);
-// };
+const generateRandomString = (length) => {
+  let str = '';
+  for (let i = 0; i <= length; i++) {
+    str += Math.random().toString(36).slice(2);
+  }
+  return str.slice(0, length);
+};
 
-// const urlsForUser = (id) => {
-//   const userURLs = {};
-//   for (const shortURL in urlDatabase) {
-//     if (urlDatabase[shortURL].userID === id) {
-//       userURLs[shortURL] = urlDatabase[shortURL].longURL;
-//     }
-//   }
-//   return userURLs;
-// };
+const urlsForUser = (id) => {
+  const userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = urlDatabase[shortURL].longURL;
+    }
+  }
+  return userURLs;
+};
 
 const users = {
   userRandomID: {
