@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const cookieSession = require('cookie-session');
-// const { cookie } = require('request');
 const bcrypt = require('bcryptjs');
 const { getUserByEmail } = require('./helpers');
 
@@ -108,7 +107,7 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.post('/urls/:id', (req, res) => {
   const currentlyLoggedIn = req.session.user_id;
-  if (!currentlyLoggedIn) {// if user is logged in
+  if (!currentlyLoggedIn) {
     return res.status(401).send('<html><body><h3>Please <a href="http://localhost:8080/login">Login</a> or <a href="http://localhost:8080/register">Register</a>.</h3></body></html>');
   }
   const id = req.params.id;
@@ -180,7 +179,6 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
-
 app.get('/urls/new', (req, res) => {
   const userId = req.session.user_id;
   if (!userId) {
@@ -225,6 +223,6 @@ app.get('/u/:id', (req, res) => {
   }
 });
 
-app.listen(PORT, () => { // what port we
+app.listen(PORT, () => {
   console.log(`Example app listening on port: ${PORT}`);
 });
