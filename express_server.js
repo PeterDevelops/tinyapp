@@ -15,50 +15,8 @@ app.use(cookieSession({
   keys: ['key1', 'key2', 'key3']
 }));
 
-// const generateRandomString = (length) => {
-//   let str = '';
-//   for (let i = 0; i <= length; i++) {
-//     str += Math.random().toString(36).slice(2);
-//   }
-//   return str.slice(0, length);
-// };
-
-// const urlsForUser = (id) => {
-//   const userURLs = {};
-//   for (const shortURL in urlDatabase) {
-//     if (urlDatabase[shortURL].userID === id) {
-//       userURLs[shortURL] = urlDatabase[shortURL].longURL;
-//     }
-//   }
-//   return userURLs;
-// };
-
-// const users = {
-//   userRandomID: {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "purple-monkey-dinosaur",
-//   },
-//   user2RandomID: {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "dishwasher-funk",
-//   },
-// };
-
-// const urlDatabase = {
-//   b6UTxQ: {
-//     longURL: "https://www.lighthouselabs.ca",
-//     userID: "aJ48lW",
-//   },
-//   i3BoGr: {
-//     longURL: "https://www.google.ca",
-//     userID: "aJ48lW",
-//   },
-// };
-
 app.get('/', (req, res) => {
-  res.send('Hello!');
+  return res.send('<html><body><h3>Welcome to TinyApp! Please <a href="http://localhost:8080/login">Login</a> or <a href="http://localhost:8080/register">Register</a>.</h3></body></html>');
 });
 
 // main page
@@ -125,7 +83,7 @@ app.post('/urls/:id', (req, res) => {
 
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.post('/register', (req, res) => {
@@ -169,7 +127,12 @@ app.get('/login', (req, res) => {
   if (cookieChecker) {
     return res.redirect('/urls');
   }
-  res.render('login');
+  const userId = req.session.user_id;
+  const userObject = users[userId];
+  const templateVars = {
+    user: userObject
+  };
+  res.render('login', templateVars);
 });
 
 app.get('/register', (req, res) => {
@@ -177,7 +140,12 @@ app.get('/register', (req, res) => {
   if (cookieChecker) {
     return res.redirect('/urls');
   }
-  res.render('register');
+  const userId = req.session.user_id;
+  const userObject = users[userId];
+  const templateVars = {
+    user: userObject
+  };
+  res.render('register', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
@@ -216,11 +184,11 @@ app.get("/urls/:id", (req, res) => {
 
 app.get('/u/:id', (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
-  if (longURL) {
-    res.redirect(longURL);
+  if (!urlDatabase[id]) {
+    return res.status(404).send('<html><body><p>URL does not exist.</p></body></html>');
   } else {
-    res.status(404).send('<html><body><p>URL does not exist.</p></body></html>');
+    const longURL = urlDatabase[id].longURL;
+    res.redirect(longURL);
   }
 });
 

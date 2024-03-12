@@ -6,7 +6,7 @@ const getUserByEmail = (email, database) => {
       return database[id].id; // database[id].id
     }
   }
-  return null;
+  return undefined;
 };
 
 const generateRandomString = (length) => {
