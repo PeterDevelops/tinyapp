@@ -10,7 +10,7 @@ Welcome to TinyApp, your go-to solution for shortening long URLs with ease! Buil
 
 ## Final Product
 
-!["Screenshot of ain page"](https://github.com/PeterDevelops/tinyapp/blob/main/docs/mainPage.png?raw=true)
+!["Screenshot of main page"](https://github.com/PeterDevelops/tinyapp/blob/main/docs/mainPage.png?raw=true)
 !["Screenshot of shorten URL page"](https://github.com/PeterDevelops/tinyapp/blob/main/docs/shortenUrlPage.png?raw=true)
 !["Screenshot of login page"](https://github.com/PeterDevelops/tinyapp/blob/main/docs/loginPage.png?raw=true)
 !["Screenshot of register page"](https://github.com/PeterDevelops/tinyapp/blob/main/docs/registerPage.png?raw=true)
